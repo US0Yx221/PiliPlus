@@ -4,6 +4,8 @@ import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/back_detector.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
+import 'package:PiliPlus/common/widgets/edge_long_press.dart';
+import 'package:PiliPlus/common/widgets/ios_back_gesture.dart';
 import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
@@ -17,6 +19,7 @@ import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/back_handler.dart' as back_handler;
 import 'package:PiliPlus/utils/desktop/calc_window_position.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/extension/core_palettes_ext.dart';
@@ -229,25 +232,8 @@ KeyEventResult _onKeyEvent(KeyEvent event) {
 }
 
 void _onBack() {
-  if (SmartDialog.checkExist()) {
-    SmartDialog.dismiss();
-    return;
+    back_handler.handleBack();
   }
-
-  final route = Get.routing.route;
-  if (route is GetPageRoute) {
-    if (route.popDisposition == .doNotPop) {
-      route.onPopInvokedWithResult(false, null);
-      return;
-    }
-  }
-
-  final navigator = Get.key.currentState!;
-  if (navigator.canPop()) {
-    navigator.pop();
-  }
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -348,6 +334,10 @@ class MyApp extends StatelessWidget {
         onBack: _onBack,
         child: child,
       );
+          if (Platform.isIOS) {
+                  child = IosBackGesture(child: child!);
+                  child = EdgeLongPress(child: child);
+                }
     }
     return child;
   }
