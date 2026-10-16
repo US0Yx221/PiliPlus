@@ -334,10 +334,10 @@ class MyApp extends StatelessWidget {
         onBack: _onBack,
         child: child,
       );
-          if (Platform.isIOS) {
-                  child = IosBackGesture(child: child!);
-                  child = EdgeLongPress(child: child);
-                }
+    }
+    if (Platform.isIOS) {
+      child = IosBackGesture(child: child!);
+      child = EdgeLongPress(child: child);
     }
     return child;
   }
