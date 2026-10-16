@@ -102,34 +102,51 @@ class _LivePageState extends State<LivePage>
                             separatorBuilder: (_, _) =>
                                 const SizedBox(width: 12),
                             itemBuilder: (context, index) {
-                              final isFirst = index == 0;
-                              late final item = list[index - 1];
-                              final isCurr = index == areaIndex;
+                              // 只显示"推荐"和"英雄联盟"
+                              int lolListIndex = -1;
+                              for (int i = 0; i < list.length; i++) {
+                                try {
+                                  if (list[i].areaV2Id == 86) {
+                                    lolListIndex = i;
+                                    break;
+                                  }
+                                } catch (_) {}
+                              }
+                              final titles = ['推荐', if (lolListIndex >= 0) '英雄联盟'];
+                              final targetIndices = [0, if (lolListIndex >= 0) lolListIndex + 1];
+                              final title = titles[index];
+                              final targetIndex = targetIndices[index];
+                              final isCurr = targetIndex == areaIndex;
                               return SearchText(
                                 fontSize: 14,
                                 height: 1,
-                                padding: const .symmetric(
-                                  horizontal: 8,
-                                  vertical: 5,
-                                ),
-                                text: isFirst ? '推荐' : item.title!,
-                                bgColor: isCurr
-                                    ? theme.colorScheme.secondaryContainer
-                                    : Colors.transparent,
-                                textColor: isCurr
-                                    ? theme.colorScheme.onSecondaryContainer
-                                    : null,
-                                onTap: (_) => controller.onSelectArea(
-                                  index,
-                                  isFirst ? null : item,
-                                ),
+                                padding: const .symmetric(horizontal: 8, vertical: 5),
+                                text: title,
+                                bgColor: isCurr ? theme.colorScheme.secondaryContainer : Colors.transparent,
+                                textColor: isCurr ? theme.colorScheme.onSecondaryContainer : null,
+                                onTap: (_) {
+                                  if (index == 0) {
+                                    controller.onSelectArea(0, null);
+                                  } else {
+                                    controller.selectLol();
+                                  }
+                                },
                               );
                             },
-                            itemCount: list.length + 1,
+                            itemCount: 2,
                           );
                         }),
                       ),
                     ),
+                    iconButton(
+                      size: 26,
+                      iconSize: 18,
+                      context: context,
+                      tooltip: '其他分区',
+                      icon: const Icon(Icons.more_horiz),
+                      onPressed: () => controller.showOtherSheet(context),
+                    ),
+                    const SizedBox(width: 8),
                     iconButton(
                       size: 26,
                       iconSize: 18,
