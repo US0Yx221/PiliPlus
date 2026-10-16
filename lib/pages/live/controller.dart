@@ -16,6 +16,7 @@ class LiveController extends CommonListController with AccountMixin {
   @override
   void onInit() {
     super.onInit();
+    areaIndex.value = 0;
     queryData();
   }
 
@@ -26,6 +27,10 @@ class LiveController extends CommonListController with AccountMixin {
   String? sortType;
   int? parentAreaId;
   final RxInt areaIndex = 0.obs;
+
+  static const int _lolAreaId = 86;
+  List<dynamic> allCategories = [];
+  bool _lolAutoSelected = false;
 
   // tag
   final RxInt tagIndex = 0.obs;
@@ -62,6 +67,25 @@ class LiveController extends CommonListController with AccountMixin {
           first: res.followItem,
           second: res.areaItem,
         );
+        final catList = res.areaItem?.cardData?.areaEntranceV3?.list;
+        if (catList != null && catList.isNotEmpty) {
+          allCategories = catList;
+        }
+        if (!_lolAutoSelected) {
+          _lolAutoSelected = true;
+          areaId = _lolAreaId;
+          parentAreaId = 2;
+          final lolIndex = catList?.indexWhere((e) => e.areaV2Id == _lolAreaId) ?? -1;
+          if (lolIndex >= 0) {
+            areaIndex.value = lolIndex + 1;
+          }
+          Future.microtask(() {
+            count = null;
+            page = 1;
+            isEnd = false;
+            queryData();
+          });
+        }
       } else if (res is LiveSecondData) {
         count = res.count;
         newTags = res.newTags;
@@ -155,5 +179,70 @@ class LiveController extends CommonListController with AccountMixin {
   void onClose() {
     followController.dispose();
     super.onClose();
+  }
+
+  void showOtherSheet(BuildContext context) {
+    final others = allCategories.where((e) {
+      try {
+        final id = e.areaV2Id?.toString() ?? '';
+        return id != _lolAreaId.toString() && id.isNotEmpty;
+      } catch (_) {
+        return true;
+      }
+    }).toList();
+    final showList = others.isNotEmpty ? others : allCategories;
+    if (showList.isEmpty) return;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('选择分区', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: showList.length,
+                itemBuilder: (c, idx) {
+                  final it = showList[idx];
+                  return ListTile(
+                    title: Text(it.title ?? ''),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      final originalIndex = allCategories.indexOf(it);
+                      if (originalIndex >= 0) {
+                        onSelectArea(originalIndex + 1, it);
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void selectLol() {
+    final lolIndex = allCategories.indexWhere((e) {
+      try {
+        return e.areaV2Id == _lolAreaId;
+      } catch (_) {
+        return false;
+      }
+    });
+    if (lolIndex >= 0) {
+      onSelectArea(lolIndex + 1, allCategories[lolIndex]);
+    } else if (areaId != _lolAreaId) {
+      areaId = _lolAreaId;
+      parentAreaId = 2;
+      count = null;
+      page = 1;
+      isEnd = false;
+      queryData();
+    }
   }
 }
