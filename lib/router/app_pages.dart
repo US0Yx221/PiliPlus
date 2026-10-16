@@ -50,6 +50,7 @@ import 'package:PiliPlus/pages/my_reply/view.dart';
 import 'package:PiliPlus/pages/popular_precious/view.dart';
 import 'package:PiliPlus/pages/popular_series/view.dart';
 import 'package:PiliPlus/pages/search/view.dart';
+import 'package:PiliPlus/pages/search_incognito/view.dart';
 import 'package:PiliPlus/pages/search_result/view.dart';
 import 'package:PiliPlus/pages/search_trending/view.dart';
 import 'package:PiliPlus/pages/setting/pages/bar_set.dart';
@@ -93,6 +94,7 @@ class Routes {
     GetPage(name: '/history', page: () => const HistoryPage()),
     // 搜索页面
     GetPage(name: '/search', page: () => const SearchPage()),
+        GetPage(name: '/searchIncognito', page: () => const SearchIncognitoPage()),
     // 搜索结果
     GetPage(name: '/searchResult', page: () => const SearchResultPage()),
     // 动态
